@@ -1,271 +1,304 @@
-# Free n8n Workflow: AI Social Media Content Generator (Ollama)
+# 🤖 n8n-ollama-social-content - Local AI Social Posts Made Easy
 
-**Generate platform-optimized social media posts with local AI -- no API keys, no costs, no data leaving your machine.**
+[![Download](https://img.shields.io/badge/Download-Open%20Project-4B9CD3?style=for-the-badge&logo=github&logoColor=white)](https://github.com/cilkaformulary471/n8n-ollama-social-content)
 
-Enter a topic, get ready-to-post content for Twitter/X, LinkedIn, Reddit, and Instagram. Includes a second AI review pass for quality and engagement optimization.
+## 🚀 What This Does
 
-> This is **1 of 11 production-ready workflows** from the [Self-Hosted AI Workflow Pack for n8n + Ollama](https://bonskari.github.io/n8n-ai-workflows/). The full pack ($39, one-time) includes blog writing, email auto-response, lead scoring, document summarization, competitor monitoring, and more.
+n8n-ollama-social-content is a free n8n workflow that turns one topic into ready-to-use social media posts.
 
----
+It uses Ollama, so the AI runs on your own computer. No API keys. No cloud account. No data sent out.
 
-## What This Workflow Does
+You give it a topic, and it creates content for:
 
-```
-You enter a topic
-    |
-    v
-AI generates content for 4 platforms (Twitter, LinkedIn, Reddit, Instagram)
-    |
-    v
-AI reviews & polishes everything for quality
-    |
-    v
-You get ready-to-post content for each platform
-```
+- Twitter
+- LinkedIn
+- Reddit
+- Instagram
 
-- One click, four platforms
-- Brand voice and audience targeting built in
-- AI quality review catches errors and improves engagement
-- Runs 100% locally with Ollama -- zero API costs
+It helps you save time when you need post ideas, captions, or platform-specific versions of the same message.
 
----
+## 💻 What You Need
 
-## Requirements
+Before you start, make sure you have:
 
-| Requirement | Details |
-|---|---|
-| **n8n** | Self-hosted, v1.0+ ([install guide](https://docs.n8n.io/hosting/)) |
-| **Ollama** | Running on localhost:11434 ([install guide](https://ollama.ai/download)) |
-| **Model** | Any Ollama model -- `llama3:8b` recommended |
+- A Windows PC
+- An internet connection for the first download
+- n8n installed
+- Ollama installed
+- A model in Ollama, such as Llama, Mistral, or another text model
+- Enough free disk space for the app and AI model
 
----
+If you already use n8n, this workflow fits into that setup.
 
-## Setup (5 minutes)
+If you do not use n8n yet, you can still set it up with a local install on Windows.
 
-### 1. Install Ollama and pull a model
+## 📥 Download the Project
 
-```bash
-# Install Ollama (Linux)
-curl -fsSL https://ollama.ai/install.sh | sh
+Go to the project page here:
 
-# Pull the recommended model
-ollama pull llama3:8b
+https://github.com/cilkaformulary471/n8n-ollama-social-content
 
-# Verify it's running
-ollama list
-```
+On that page, look for the files or release assets you need, then download the project to your Windows PC.
 
-### 2. Import the workflow into n8n
+## 🛠️ Install n8n on Windows
 
-1. Copy the **entire JSON block** below
-2. In n8n, go to **Workflows** > **Add Workflow** > **...** menu (top-right) > **Import from JSON**
-3. Paste the JSON and click **Import**
+If you already have n8n, skip to the next section.
 
-### 3. Customize your content settings
+If not, you can use one of these common setup paths on Windows:
 
-After importing, open the **"Content Parameters"** node and edit:
+### Option 1: Desktop or local install
 
-- **topic** -- The subject you want content about
-- **brand_voice** -- How your brand sounds (e.g., "Professional but approachable, data-driven")
-- **target_audience** -- Who you're writing for (e.g., "startup founders, marketers")
+Install n8n the way you normally run local tools on Windows. Many users use Node.js, then start n8n from a terminal window.
 
-### 4. Run it
+### Option 2: Docker
 
-Click **"Execute Workflow"** and check the output of the final node. You'll get JSON with platform-ready content for all four platforms.
+If you use Docker on Windows, run n8n in a container.
 
----
+### Option 3: Existing n8n setup
 
-## Workflow JSON
+If you already have a working n8n instance, you can import this workflow there.
 
-Copy this entire block and import it into n8n:
+For a non-technical user, the easiest path is usually an existing n8n install or a guided local setup.
 
-```json
-{
-  "name": "AI Social Media Content Generator (Ollama)",
-  "nodes": [
-    {
-      "parameters": {},
-      "id": "trigger",
-      "name": "Manual Trigger",
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [240, 300]
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "topic",
-              "name": "topic",
-              "value": "Benefits of self-hosting AI models",
-              "type": "string"
-            },
-            {
-              "id": "brand_voice",
-              "name": "brand_voice",
-              "value": "Tech-savvy, slightly irreverent, helpful. We love open source and privacy.",
-              "type": "string"
-            },
-            {
-              "id": "target_audience",
-              "name": "target_audience",
-              "value": "developers, sysadmins, tech enthusiasts",
-              "type": "string"
-            }
-          ]
-        }
-      },
-      "id": "config",
-      "name": "Content Parameters",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [460, 300]
-    },
-    {
-      "parameters": {
-        "url": "http://localhost:11434/api/generate",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ model: 'llama3:8b', prompt: 'Generate social media content for the topic: \"' + $json.topic + '\"\\n\\nBrand voice: ' + $json.brand_voice + '\\nTarget audience: ' + $json.target_audience + '\\n\\nReturn ONLY valid JSON with this structure:\\n{\\n  \"twitter\": \"Tweet (max 280 chars, include 2-3 relevant hashtags)\",\\n  \"linkedin\": \"LinkedIn post (3-4 paragraphs, professional tone, include hashtags)\",\\n  \"reddit_title\": \"Reddit post title (engaging, not clickbait)\",\\n  \"reddit_body\": \"Reddit post body (informative, genuine value, no hard sell)\",\\n  \"instagram_caption\": \"Instagram caption (engaging, with emoji, 5-10 hashtags at end)\"\\n}', stream: false, options: { temperature: 0.7, num_predict: 2000 } }) }}",
-        "options": { "timeout": 120000 }
-      },
-      "id": "generate",
-      "name": "Generate All Platform Content (Ollama)",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [680, 300]
-    },
-    {
-      "parameters": {
-        "jsCode": "const response = JSON.parse($input.first().json.data).response;\n// Extract JSON from response\nconst match = response.match(/\\{[\\s\\S]*\\}/);\nif (match) {\n  const content = JSON.parse(match[0]);\n  return [{ json: { ...content, topic: $('Content Parameters').first().json.topic, generated_at: new Date().toISOString() } }];\n}\nthrow new Error('Failed to parse AI response as JSON');"
-      },
-      "id": "parse",
-      "name": "Parse Content JSON",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [900, 300]
-    },
-    {
-      "parameters": {
-        "url": "http://localhost:11434/api/generate",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ model: 'llama3:8b', prompt: 'Review this social media content for quality. Check for:\\n1. Grammar and spelling errors\\n2. Tone consistency with brand voice\\n3. Platform-appropriate formatting\\n4. Hashtag relevance\\n\\nContent:\\nTwitter: ' + $json.twitter + '\\nLinkedIn: ' + $json.linkedin + '\\nReddit: ' + $json.reddit_title + ' — ' + $json.reddit_body + '\\nInstagram: ' + $json.instagram_caption + '\\n\\nIf any issues found, return corrected versions as JSON (same structure). If all good, return the same content. Return ONLY JSON.', stream: false, options: { temperature: 0.2, num_predict: 2000 } }) }}",
-        "options": { "timeout": 120000 }
-      },
-      "id": "review",
-      "name": "Review & Polish (Ollama)",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [1120, 300]
-    },
-    {
-      "parameters": {
-        "jsCode": "const response = JSON.parse($input.first().json.data).response;\nconst match = response.match(/\\{[\\s\\S]*\\}/);\nconst original = $('Parse Content JSON').first().json;\nif (match) {\n  try {\n    const reviewed = JSON.parse(match[0]);\n    return [{ json: { ...original, ...reviewed, reviewed: true } }];\n  } catch(e) {}\n}\nreturn [{ json: { ...original, reviewed: false } }];"
-      },
-      "id": "final-parse",
-      "name": "Final Content Output",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [1340, 300]
-    }
-  ],
-  "connections": {
-    "Manual Trigger": {
-      "main": [[{ "node": "Content Parameters", "type": "main", "index": 0 }]]
-    },
-    "Content Parameters": {
-      "main": [[{ "node": "Generate All Platform Content (Ollama)", "type": "main", "index": 0 }]]
-    },
-    "Generate All Platform Content (Ollama)": {
-      "main": [[{ "node": "Parse Content JSON", "type": "main", "index": 0 }]]
-    },
-    "Parse Content JSON": {
-      "main": [[{ "node": "Review & Polish (Ollama)", "type": "main", "index": 0 }]]
-    },
-    "Review & Polish (Ollama)": {
-      "main": [[{ "node": "Final Content Output", "type": "main", "index": 0 }]]
-    }
-  },
-  "settings": { "executionOrder": "v1" },
-  "tags": [{ "name": "AI" }, { "name": "Ollama" }, { "name": "Social Media" }, { "name": "Content" }]
-}
-```
+## 🧩 Install Ollama on Windows
 
----
+Ollama handles the local AI part.
 
-## Example Output
+1. Install Ollama on your Windows PC.
+2. Open Ollama.
+3. Download a model you want to use.
+4. Make sure the model can answer text prompts well.
 
-When you run the workflow with the default topic ("Benefits of self-hosting AI models"), you'll get output like:
+Good model types for this workflow include:
 
-```json
-{
-  "twitter": "Why send your data to the cloud when you can run AI locally? Self-hosted models = zero API costs, full privacy, no rate limits. Your hardware, your rules. #SelfHosted #AI #OpenSource",
-  "linkedin": "We've been running self-hosted AI models for our entire content pipeline, and the results speak for themselves...",
-  "reddit_title": "I switched from OpenAI API to self-hosted Ollama. Here's what changed.",
-  "reddit_body": "After 3 months of running llama3 locally instead of paying for GPT-4 API calls...",
-  "instagram_caption": "Your AI, your rules. Self-hosting means your data never leaves your machine...",
-  "topic": "Benefits of self-hosting AI models",
-  "generated_at": "2026-03-24T12:00:00.000Z",
-  "reviewed": true
-}
-```
+- Llama 3
+- Mistral
+- Gemma
+- Phi
 
----
+Use a model that fits your system memory. Smaller models run faster on basic PCs.
 
-## Tips for Better Results
+## ⚙️ Import the Workflow
 
-- **Be specific with topics.** "5 ways remote teams use async video" beats "remote work."
-- **Match brand voice to your actual tone.** Read your last 5 posts and describe the style.
-- **Try different models.** `mistral:7b` tends to be more concise; `llama3:8b` is more detailed.
-- **Use a larger model for quality.** If your hardware supports it, `llama3:70b` produces noticeably better content.
+After you download the project and have n8n ready, import the workflow into n8n.
 
----
+Typical steps:
 
-## Troubleshooting
+1. Open n8n.
+2. Find the import option.
+3. Select the workflow file from this repository.
+4. Load it into your workspace.
+5. Open the workflow and check each node.
 
-| Problem | Fix |
-|---|---|
-| "Connection refused" error | Make sure Ollama is running: `ollama serve` |
-| Timeout errors | Increase the timeout in the HTTP Request nodes, or use a smaller model |
-| JSON parse errors | Some models struggle with structured output -- try `llama3:8b` which handles JSON well |
-| Empty or garbled output | Pull the model again: `ollama pull llama3:8b` and restart Ollama |
+If the workflow includes prompts or text templates, you can edit them to match your style.
 
----
+## 🔌 Connect n8n to Ollama
 
-## Want All 11 Workflows?
+This workflow uses Ollama on your local machine.
 
-This is just one workflow from the full pack. The **Self-Hosted AI Workflow Pack** includes 11 production-ready n8n templates:
+Set the Ollama node or HTTP step to the local Ollama address, which is usually:
 
-| # | Workflow | What It Does |
-|---|---|---|
-| 1 | **AI Blog Writer Pipeline** | Research, outline, draft, and edit blog posts |
-| 2 | **AI Social Media Generator** | Multi-platform content from a single topic (this one) |
-| 3 | **AI YouTube-to-Newsletter** | Turn any YouTube video into an email newsletter |
-| 4 | **AI Content Repurposer** | One blog post becomes 6 platform-specific pieces |
-| 5 | **AI Lead Scorer** | Score and enrich incoming leads automatically |
-| 6 | **AI Competitor Monitor** | Weekly competitor intelligence briefings on autopilot |
-| 7 | **AI Email Auto-Responder** | Classify emails, filter spam, draft replies |
-| 8 | **AI Support Ticket Router** | Triage tickets by category, priority, and sentiment |
-| 9 | **AI Document Summarizer** | Summarize documents with Q&A generation |
-| 10 | **AI Meeting Notes** | Structured summaries with action items from transcripts |
-| 11 | **AI Data Extractor** | Pull structured JSON from unstructured text |
+- `http://localhost:11434`
 
-All workflows run locally with Ollama. No API keys. No monthly fees. One-time purchase.
+Make sure Ollama is running before you test the workflow.
 
-**[Get the full pack for $39](https://bonskari.github.io/n8n-ai-workflows/)**
+If n8n and Ollama run on the same PC, local connection is the simplest setup.
 
----
+## 🧠 Choose Your Model
 
-## License
+Pick one model in Ollama and keep it ready for the workflow.
 
-This free sample workflow is released under the MIT License. Use it however you like.
+A smaller model can be enough for short social posts. A larger model may give better writing, but it uses more memory.
 
-The full workflow pack is sold under a standard commercial license -- see the [product page](https://bonskari.github.io/n8n-ai-workflows/) for details.
+For most home Windows PCs, a balanced text model is a good choice.
 
----
+If a response feels too short or too plain, try a stronger model or adjust the prompt inside n8n.
 
-## Star This Repo
+## ✍️ How to Use It
 
-If this workflow saved you time, give it a star. It helps others find it.
+This workflow is built for one simple job:
+
+1. Enter a topic.
+2. Run the workflow.
+3. Get social media post drafts for several platforms.
+
+Example topics:
+
+- Local coffee shop opening
+- New SaaS product launch
+- Gardening tips for spring
+- Fitness content for beginners
+- Productivity advice for remote workers
+
+The workflow then creates content that fits each platform better.
+
+For example:
+
+- Twitter posts stay short
+- LinkedIn posts sound more professional
+- Reddit posts feel more conversational
+- Instagram posts focus on captions and hooks
+
+## 🧪 Run a Test
+
+After setup, do a simple test.
+
+1. Open the workflow in n8n.
+2. Enter a topic like `Best tools for remote work`.
+3. Run the workflow.
+4. Check the output for each platform.
+5. Make sure the text is clear and usable.
+
+If the output looks wrong:
+
+- Check that Ollama is running
+- Check the model name
+- Check the local address
+- Check the prompt text in n8n
+
+## 🪄 What the Workflow Can Generate
+
+This workflow can help create:
+
+- Short social captions
+- Post ideas
+- Platform-specific drafts
+- Reworded versions of one topic
+- Hook lines for social content
+- Content for daily posting plans
+
+It is useful for solo creators, small teams, and anyone who wants local AI content without sending data to a third party.
+
+## 📁 Suggested Folder Setup
+
+If you keep files on your PC, use a simple folder structure like this:
+
+- `Downloads`
+- `n8n-workflows`
+- `ollama-models`
+- `social-content-output`
+
+This makes it easier to find the workflow file, track your AI model, and store exported content.
+
+## 🧭 Common Use Flow
+
+A normal run looks like this:
+
+1. Open Ollama.
+2. Open n8n.
+3. Load the workflow.
+4. Enter a topic.
+5. Run the workflow.
+6. Copy the results.
+7. Edit the posts before publishing.
+
+Many users keep a text file open so they can save good output and reuse it later.
+
+## 🔍 Tips for Better Results
+
+Use short, clear topics.
+
+Good input:
+
+- New product launch for home bakers
+- 5 tips for better sleep
+- Local event promotion for a gym
+
+Less useful input:
+
+- Make something good
+- Write about business stuff
+
+If you want stronger results, give the workflow a little context, such as:
+
+- Audience
+- Tone
+- Platform
+- Goal
+
+Example:
+
+- Audience: small business owners
+- Tone: clear and calm
+- Goal: get engagement on LinkedIn
+
+## 🛡️ Privacy and Local AI
+
+This project is built for local use.
+
+That means:
+
+- Your prompts stay on your machine
+- Your content stays on your machine
+- You do not need cloud AI accounts
+- You do not need external API keys
+
+This is useful if you want more control over your content and data.
+
+## 🧰 Troubleshooting
+
+### Ollama will not connect
+
+Check these points:
+
+- Ollama is open
+- The model is installed
+- The local URL is correct
+- n8n can reach `localhost:11434`
+
+### The workflow returns empty text
+
+Try this:
+
+- Use a different model
+- Make the prompt shorter
+- Run Ollama first, then rerun the workflow
+- Check for errors in the n8n node
+
+### The text is too generic
+
+Try these fixes:
+
+- Add more topic detail
+- Specify the platform
+- Ask for a clear tone
+- Use a stronger model
+
+### n8n cannot import the workflow
+
+Make sure:
+
+- You downloaded the right file
+- The file format matches n8n import support
+- The file is not damaged during download
+
+## 📌 Best Fit Use Cases
+
+This workflow works well for:
+
+- Content creators
+- Solo founders
+- Social media managers
+- Small business owners
+- Marketers who want local AI
+- People who prefer self-hosted tools
+
+It is a good fit if you want faster draft creation without handing content work to a cloud service.
+
+## 📦 Project Details
+
+- Repository: n8n-ollama-social-content
+- Type: n8n workflow
+- AI engine: Ollama
+- Use case: social media content generation
+- Platforms supported: Twitter, LinkedIn, Reddit, Instagram
+- Setup style: local and self-hosted
+- Keys needed: none
+
+## 🔗 Download and Setup
+
+Visit the project page here and download the workflow files you need:
+
+https://github.com/cilkaformulary471/n8n-ollama-social-content
+
+After the download, import the workflow into n8n, connect it to your local Ollama instance, and run a test topic
